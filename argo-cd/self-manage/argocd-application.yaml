@@ -9,7 +9,7 @@ spec:
     namespace: argocd
     server: https://kubernetes.default.svc
   source:
-    repoURL: https://github.com/tomasferrarisenda/backstage-minikube-lab-reloaded.git # This value was modified by the initial-setup script
+    repoURL: https://github.com/AATT_GITHUB_USERNAME/backstage-minikube-lab-reloaded.git # This value was modified by the initial-setup script
     path: helm-charts/infra/argo-cd
     helm:
       valueFiles:

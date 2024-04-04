@@ -17,7 +17,7 @@ spec:
     helm:
       valueFiles:
         - environments/values-dev.yaml
-    repoURL: https://github.com/tomasferrarisenda/backstage-minikube-lab-reloaded.git 
+    repoURL: https://github.com/AATT_GITHUB_USERNAME/backstage-minikube-lab-reloaded.git 
   syncPolicy:
     automated:
       prune: true

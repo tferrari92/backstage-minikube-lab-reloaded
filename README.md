@@ -43,6 +43,8 @@ Backstage is a framework for creating developer portals. This developer portal s
 
 We'll be using a GitOps methodology with Helm, ArgoCD and the App Of Apps Pattern. There is some extra information [here](/docs/argocd-notes.md), but you are expected to know about these things.
 
+For a simpler implementation of Backstage check out the [Backstage Minikube Lab regular edition](https://github.com/tferrari92/backstage-minikube-lab).
+
 </br>
 </br>
 

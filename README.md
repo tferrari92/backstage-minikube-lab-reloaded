@@ -165,7 +165,7 @@ Create env var for your GitHub token
 export GITHUB_TOKEN=<your-github-token> AUTH_GITHUB_CLIENT_ID=<your-github-auth-client-id> AUTH_GITHUB_CLIENT_SECRET=<your-github-auth-client-secret>
 ```
 
-cd into my-backstage directory
+`cd` into my-backstage directory
 ```bash
 cd backstage/my-backstage/
 ```
@@ -352,7 +352,7 @@ chmod +x build-push-image.sh
 ./build-push-image.sh
 ```
 
-cd to the root of the repo:
+`cd` to the root of the repo:
 ```bash
 cd ../..
 ```

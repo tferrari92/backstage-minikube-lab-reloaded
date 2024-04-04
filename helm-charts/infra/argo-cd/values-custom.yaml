@@ -1,0 +1,77 @@
+## Argo Configs
+configs:
+  # General Argo CD configuration
+  params:
+    ## Server properties
+    # -- Run server without TLS
+    server.insecure: true
+
+  cm:
+    # This is to make Sync Waves work in the App of Apps pattern (https://argo-cd.readthedocs.io/en/stable/operator-manual/upgrading/1.7-1.8/#health-assessment-of-argoprojioapplication-crd-has-been-removed)
+    resource.customizations.health.argoproj.io_Application: |
+      hs = {}
+      hs.status = "Progressing"
+      hs.message = ""
+      if obj.status ~= nil then
+        if obj.status.health ~= nil then
+          hs.status = obj.status.health.status
+          if obj.status.health.message ~= nil then
+            hs.message = obj.status.health.message
+          end
+        end
+      end
+      return hs
+
+    accounts.backstage-service-account: apiKey, login
+    accounts.frontend: apiKey, login
+    accounts.backend: apiKey, login
+    accounts.database: apiKey, login
+
+  rbac:
+    policy.csv: |
+      g, backstage-service-account, role:readonly
+      g, frontend, role:readonly
+      g, backend, role:readonly
+      g, database, role:readonly
+
+  secret:
+    # -- Bcrypt hashed admin password
+    ## Argo expects the password in the secret to be bcrypt hashed. You can create this hash with
+    ## `htpasswd -nbBC 10 "" $ARGO_PWD | tr -d ':\n' | sed 's/$2y/$2a/'`
+    # argocdServerAdminPassword: '$2a$10$0vz/zfXVeaLyOZkGQO6tgO15gOSf6P.zCpsLvJ8slkrOQe.Wq42W.' # admin
+
+    extra:
+      ## Argo expects the password in the secret to be bcrypt hashed. You can create this hash with
+      ## `htpasswd -nbBC 10 "" $ARGO_PWD | tr -d ':\n' | sed 's/$2y/$2a/'`
+      accounts.backstage-service-account.password: '$2a$10$dcoQrqTuhzk4VTLpehzmjOL29zSba8w/08rLGbiXiqbYGGEZMYJBu' # backstage
+      accounts.frontend.password: '$2a$10$LldyQmOa7/KCtnB4uyeA4.lBXJScLWyUCmS5MSebZpPXgJXLE9bye' # frontend
+      accounts.backend.password: '$2a$10$IaI7yXLoWiQ.XlzZmAUxFOhEWgK8Fm21bZ/vtUBufK9yZnt7EUsri' # backend
+      accounts.database.password: '$2a$10$4NRIsDFel0OaYPy9bAgedeycShVrK2kTNUap4TzHoFm1bUpjuE/z2' # database
+
+server:
+  ingress:
+    enabled: false
+
+    hosts: 
+      - argocd.tferrari.com # This value was modified by the initial-setup python script
+
+    annotations: 
+      # External-DNS related annotations
+      external-dns.alpha.kubernetes.io/hostname: argocd.tferrari.com # This value was modified by the initial-setup python script
+      
+      # ALB related annotations
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+      alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+      alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+      alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+      alb.ingress.kubernetes.io/success-codes: '200'
+      alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+      alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+
+      # TLS related annotations
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:373421766055:certificate/d9b3107e-3882-4fff-b8b3-cf33f76daffb # This value was modified by the deploy-infra pipeline
+  

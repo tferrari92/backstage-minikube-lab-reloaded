@@ -1,0 +1,13 @@
+environment: dev
+
+deployment:
+  image:  
+    tag: backstage-minikube-lab
+  replicas: 1
+
+  labels:
+    environment: dev
+    app: my-app-backend-dev
+    
+  env:
+    redis_host: my-app-redis-dev-master 

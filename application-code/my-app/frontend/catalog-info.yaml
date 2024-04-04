@@ -1,0 +1,39 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: my-app-frontend
+  description: My-App Frontend service
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/kubernetes-id: my-app-frontend
+    github.com/project-slug: tomasferrarisenda/backstage-minikube-lab-reloaded
+    argocd/app-selector: system-service=my-app-frontend # This is for Backstage ArgoCD plugin. Can also use argocd/app-name
+    grafana/dashboard-selector: "tags @> 'linux'" # The following selector will return dashboards that have a 'linux' tag
+    # grafana/overview-dashboard: 'http://localhost:8082/d/k8s_views_global/kubernetes-views-global' # I couldn't make this work. Got error: Refused to frame 'https://localhost:8082/' because it violates the following Content Security Policy directive: "frame-src 'self' http://localhost:8082".
+  tags:
+    - nginx
+  links:
+    - title: Documentation
+      url: https://github.com/tomasferrarisenda/backstage-minikube-lab-reloaded
+    - url: https://admin.example-org.com
+      title: Admin Dashboard
+      icon: dashboard
+      type: admin-dashboard
+    - url: https://grafana.domain.com/
+      title: metrics
+      icon: analytics
+      type: metrics-dashboard
+    - url: https://grafana.domain.com/
+      title: logs
+      icon: assignment
+      type: logs-dashboard  
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/my-app-frontend-subteam
+  system: my-app
+  dependsOn:
+    - component:default/my-app-backend
+  consumesApis:
+    - my-app-backend-api
+

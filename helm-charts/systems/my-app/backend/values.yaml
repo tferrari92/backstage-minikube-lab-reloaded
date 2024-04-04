@@ -1,0 +1,12 @@
+system: my-app
+
+service: backend
+
+deployment:
+  image:
+    repository: tferrari92/my-app-backend # This value was modified by the initial-setup script
+    
+  labels:
+    system: my-app
+    service: backend
+    backstage.io/kubernetes-id: my-app-backend

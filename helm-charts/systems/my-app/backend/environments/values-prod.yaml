@@ -1,0 +1,13 @@
+environment: prod
+
+deployment:
+  image:
+    tag: backstage-minikube-lab
+  replicas: 1
+
+  labels:
+    environment: prod
+    app: my-app-backend-prod
+
+  env:
+    redis_host: my-app-redis-prod-master 

@@ -1,0 +1,32 @@
+environment: prod
+
+deployment:
+  image:
+    tag: backstage-minikube-lab
+  replicas: 1
+
+  labels:
+    environment: prod
+    app: my-app-frontend-prod
+
+configmap: 
+  nginxConf: |-
+    server {
+        listen       80;
+        listen  [::]:80;
+        server_name  localhost;
+    
+        location / {
+            root   /usr/share/nginx/html;
+            index  index.html index.htm;
+        }
+    
+        location /api {
+            proxy_pass http://my-app-backend-prod-service:3000/; # This value was modified by the initial-setup script
+        }
+        
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+    }

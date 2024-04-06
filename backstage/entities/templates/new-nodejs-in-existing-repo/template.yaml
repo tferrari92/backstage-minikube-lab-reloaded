@@ -80,26 +80,15 @@ spec:
           #   - hard-coded-tag1
           #   - hard-coded-tag2
 
-# RELOADED
     - id: fetch-helm-chart
       name: Fetch Helm Chart
       action: fetch:template
       input:
         url: ./helm-chart
-        targetPath: helm/${{ parameters.system }}/${{ parameters.service }}
+        targetPath: helm-charts/systems/${{ parameters.system }}/${{ parameters.service }}
         values:
           system: ${{ parameters.system }}
           service: ${{ parameters.service }}
-
-    # - id: fetch-k8s-manifests
-    #   name: Fetch K8S Manifests
-    #   action: fetch:template
-    #   input:
-    #     url: ./k8s-manifests
-    #     targetPath: k8s-manifests/${{ parameters.system }}/${{ parameters.service }}
-    #     values:
-    #       system: ${{ parameters.system }}
-    #       service: ${{ parameters.service }}
 
     - id: fetch-github-workflow
       name: Fetch GitHub Workflow
@@ -126,20 +115,10 @@ spec:
         targetPath: "" # Leave empty to use the root of the repo or specify if needed
         paths: 
           - application-code/${{ parameters.system }}/${{ parameters.service }}
-          # - k8s-manifests/${{ parameters.system }}-${{ parameters.service }}
-# RELOADED
-          - helm-charts/${{ parameters.system }}/${{parameters.service}}
+          - helm-charts/systems/${{ parameters.system }}/${{parameters.service}}
           - .github/workflows
 
-    # NO HACE FALTA REGISTRAR EN CATALOGO PORQ VA A SER AUTO DESCUBIERTO POR EL GH DISCOVERY PLUGIN
-    # The final step is to register our new component in the catalog.
-    # - id: register
-    #   name: Register
-    #   action: catalog:register
-    #   input:
-    #     repoContentsUrl: https://github.com/tomasferrarisenda/backstage
-    #     catalogInfoPath: backstage/blob/create-${{ parameters.system }}-${{ parameters.service }}/${{ parameters.system }}/${{ parameters.service }}/catalog-info.yaml
-        
+
   output:
     links:
       # - title: Repository
@@ -149,5 +128,3 @@ spec:
       # - title: Open in catalog
       #   icon: catalog
       #   entityRef: ${{ steps.register.output.entityRef }}
-
-

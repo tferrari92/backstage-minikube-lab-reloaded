@@ -7,6 +7,11 @@ configs:
     server.insecure: true
 
   cm:
+    # -- Timeout to discover if a new manifests version got published to the repository
+    timeout.reconciliation: 30s
+    # -- Timeout to refresh application data as well as target manifests cache
+    timeout.hard.reconciliation: 30s
+    
     # This is to make Sync Waves work in the App of Apps pattern (https://argo-cd.readthedocs.io/en/stable/operator-manual/upgrading/1.7-1.8/#health-assessment-of-argoprojioapplication-crd-has-been-removed)
     resource.customizations.health.argoproj.io_Application: |
       hs = {}

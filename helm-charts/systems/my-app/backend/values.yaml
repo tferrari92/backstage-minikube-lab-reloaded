@@ -4,7 +4,7 @@ service: backend
 
 deployment:
   image:
-    repository: AATT_DOCKERHUB_USERNAME/my-app-backend # This value was modified by the initial-setup script
+    repository: tferrari92/my-app-backend # This value was modified by the initial-setup script
     
   labels:
     system: my-app

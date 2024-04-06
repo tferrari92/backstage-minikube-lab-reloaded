@@ -382,6 +382,10 @@ Now go to localhost:8080 on your browser and Voilá!
 
 You should be able to access ArgoCD UI on localhost:8081 server to check everything is runnin fine.
 
+Grafana will also be exposed on localhost:8082. The credentials are:
+- user: admin
+- password: automate-all-the-things
+
 </br>
 </br>
 

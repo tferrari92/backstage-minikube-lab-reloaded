@@ -4,3 +4,7 @@ deployment:
   image:  
     tag: 
   replicas: 1
+
+  labels:
+    environment: prod
+    app: ${{ values.system }}-${{ values.service }}-prod

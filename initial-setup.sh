@@ -37,6 +37,7 @@ replace_string_in_file "argo-cd/self-manage/argocd-app-of-apps-application.yaml"
 replace_string_in_file "argo-cd/self-manage/argocd-application.yaml" "$github_username" "$dockerhub_username"
 
 replace_string_in_file "backstage/my-backstage/app-config.yaml" "$github_username" "$dockerhub_username"
+replace_string_in_file "backstage/my-backstage/build-push-image.sh" "$github_username" "$dockerhub_username"
 
 replace_string_in_file "helm-charts/infra/backstage/values-custom.yaml" "$github_username" "$dockerhub_username"
 

@@ -12,7 +12,7 @@ metadata:
     - nodejs
   links:
     - title: Documentation
-      url: https://github.com/tomasferrarisenda/backstage-minikube-lab-reloaded
+      url: https://github.com/tferrari92/backstage-minikube-lab-reloaded
     - url: https://admin.example-org.com
       title: Admin Dashboard
       icon: dashboard

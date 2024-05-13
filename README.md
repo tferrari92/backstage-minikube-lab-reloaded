@@ -114,12 +114,13 @@ Create these two repository secrets on your GitHub repo:
 </br>
 
 ### Set up GitHub OAuth
-https://github.com/settings/applications/new
-Application name	Backstage
-Homepage URL	http://localhost:3000/
-Authorization callback URL	http://localhost:7007/api/auth/github/handler/frame
-
-save client id and secret in a safe fplace
+1. Go [here](https://github.com/settings/applications/new).
+2. Complete with the following data:
+    Application name	Backstage
+    Homepage URL	http://localhost:3000/
+    Authorization callback URL	http://localhost:7007/api/auth/github/handler/frame
+3. Click on "Generate a new client secret".
+4. Save Client ID and Secret somewhere safe.
 
 </br>
 

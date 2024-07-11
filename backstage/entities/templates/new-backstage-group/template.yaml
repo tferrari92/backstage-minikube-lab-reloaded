@@ -10,10 +10,12 @@ spec:
   owner: web@example.com
   type: component
   parameters:
+
+    ###############################################################################################################
+    # First page
     - title: Provide some simple information
       required:
         - name
-        - title
         - description
         - type
         - email
@@ -23,23 +25,27 @@ spec:
           type: string
           description: Name of the new group
           ui:field: EntityNamePicker
-          ui:autofocus: true
-        title:
-          title: Title
-          type: string
-          description: Human readable title of the new group
-          # ui:field: EntityNamePicker
-          ui:autofocus: true
+          pattern: '^[a-z0-9-]+$' # Only lowercase letters, numbers and hyphens
+          maxLength: 30
+          ui:help: 'Use only lowercase letters, numbers and hyphens. Max length: 30 characters.'  
+
         description:
           title: Description
           type: string
-          description: Describe the new group
-          # ui:field: EntityNamePicker
-          ui:autofocus: true
+          description: Describe the new group.
+          minLength: 10
+          ui:help: 'Make it descriptive! At least 10 characters.'
+
         parent:
           title: Parent
           type: string
-          description: Parent of the new group. If empty, it will default to 'root'
+          description: Parent of the new group.
+          ui:help: If empty, it will default to 'root'
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter: # This uses the value "group:default/meme-web-team"
+              - kind: Group
+
         type:
           title: Type
           type: string
@@ -48,14 +54,15 @@ spec:
             - team
             - business-unit
             - product-area
+
         email:
           title: Email
           type: string
+          pattern: ^\S+@\S+\.\S+$
           description: Email of the new group
-          # ui:field: EntityNamePicker
-          ui:autofocus: true
 
-
+    ###############################################################################################################
+    # Second page
     - title: Choose a location
       required:
         - repoUrl
@@ -67,6 +74,15 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
+            # allowedOrganizations: # This doesn't get displayed as a dropdown list like allowedRepos does, IDK why.
+            #   - AATT_GITHUB_USERNAME
+            allowedRepos:
+              - backstage-minikube-lab
+              - backstage-minikube-lab-reloaded
+              - automate-all-the-things-braindamage
+              - automate-all-the-things-transcendence
+              - automate-all-the-things-nirvana
+              - automate-all-the-things-almighty
 
   steps:
     - id: fetch-base
@@ -76,27 +92,10 @@ spec:
         url: ./skeleton
         values:
           name: ${{ parameters.name }}
-          title: ${{ parameters.title }}
           description: ${{ parameters.description }}
           type: ${{ parameters.type }}
-          # Had to add default value 'root' because the 'parent' parameter in the Group manifest needs to have a value. It cannot be '[]' or 'null'. 
-          # And since we are establishing hierarchy from the bottom up, we must have the 'parent' parameter in the Group manifest.
-          # parent: ${{ parameters.parent | default('root') }} 
-          # THIS IS WRONG. This actually gives an error on the Backstage UI.
-          # So instead of this I added a conditional for values.parent on the skeleton.
-          # I leave this here for reference.
-          parent: ${{ parameters.parent }}
+          parent: ${{ parameters.parent | replace('group:default/', '') }}
           email: ${{ parameters.email }}
-
-    # - id: append-new-user
-    #   name: Append new user to all-users.yaml
-    #   action: shell
-    #   input:
-    #     cmd: bash
-    #     args:
-    #       - -c
-    #       - |
-    #         echo "    - ./users/${{parameters.name | lower }}-${{parameters.lastName | lower }}.yaml" >> entities/all-users.yaml
 
     - id: publish
       name: Publish
@@ -104,24 +103,15 @@ spec:
       input:
         allowedHosts: ['github.com']
         repoUrl: ${{ parameters.repoUrl }}
-        title: "Create new group: ${{parameters.name}}"
-        branchName: create-group-${{parameters.name | lower }}
+        title: "Create new group: ${{ parameters.name }}"
+        branchName: create-group-${{ parameters.name }}
         description: |
-          # New group: ${{parameters.name}}
+          # New group: ${{ parameters.name }}
+
+          ${{ parameters.description if parameters.description }}
         targetPath: backstage/entities/groups
-        # targetPath: "" # Leave empty to use the root of the repo or specify if needed
-        # paths: 
-        #   - backstage/entities/users
-        #   - backstage/entities/all-users.yaml
         
   output:
     links:
-      - url: ${{steps.publish.output.remoteUrl}}
+      - url: ${{ steps.publish.output.remoteUrl }}
         title: "Go to PR"
-      # - title: Repository
-      #   url: ${{ steps.publish.output.remoteUrl }}
-      # - title: Open in catalog
-      #   icon: catalog
-      #   entityRef: ${{ steps.register.output.entityRef }}
-
-

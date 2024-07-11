@@ -1,4 +1,4 @@
-site_name: ${{ values.system }}-${{ values.service }} Documentation
+site_name: ${{ values.system }}-${{ values.service }} documentation
 nav:
   - Home: index.md
   - API: api.md

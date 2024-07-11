@@ -10,6 +10,9 @@ spec:
   owner: web@example.com
   type: service
   parameters:
+
+    ###############################################################################################################
+    # First page
     - title: Provide some simple information
       required:
         - system
@@ -20,37 +23,41 @@ spec:
         system:
           title: System
           type: string
-          description: Name of the system the new service belongs to. Example -> 'my-app'
-          ui:field: EntityNamePicker
-          ui:autofocus: true
+          description: System the new service belongs to.
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              - kind: System
+            defaultKind: System # Necessary for options to show as "system-name" and not "default/system-name"
+
         service:
           title: Name
           type: string
-          description: Unique name of the new service. Example -> 'backend'
+          description: Unique name of the new service.
           ui:field: EntityNamePicker
+          pattern: '^[a-z0-9-]+$' # Only lowercase letters, numbers and hyphens
+          maxLength: 30
+          ui:help: 'Use only lowercase letters, numbers and hyphens. Max length: 30 characters.'  
+
         description:
           title: Description
           type: string
-          description: Help others understand what this service is for
+          description: Help others understand what this bucket is for.
+          minLength: 10
+          ui:help: 'Make it descriptive! At least 10 characters.'
+
         owner:
           title: Owner
           type: string
-          description: Owner of the service
+          description: Owner of the service.
           ui:field: OwnerPicker
           ui:options:
-            allowedKinds:
-              - Group
-        # tags:
-        #   type: array
-        #   title: Tags
-        #   description: Tags to categorize the service
-        #   items:
-        #     type: string
-        # targetPath:
-        #   title: Target Path in repo
-        #   type: string
-        #   description: Name of the directory to create in the repository. Don't include the root slash.
+            catalogFilter: # This uses the value "group:default/meme-web-team"
+              - kind: Group
+                # spec.type: team # You can make it more specific by adding more filters like this
 
+    ###############################################################################################################
+    # Second page
     - title: Choose a location
       required:
         - repoUrl
@@ -62,6 +69,15 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
+            # allowedOrganizations: # This doesn't get displayed as a dropdown list like allowedRepos does, IDK why.
+            #   - AATT_GITHUB_USERNAME
+            allowedRepos:
+              - backstage-minikube-lab
+              - backstage-minikube-lab-reloaded
+              - automate-all-the-things-braindamage
+              - automate-all-the-things-transcendence
+              - automate-all-the-things-nirvana
+              - automate-all-the-things-almighty
 
   steps:
     - id: fetch-base-code
@@ -69,26 +85,38 @@ spec:
       action: fetch:template
       input:
         url: ./base-code
-        targetPath: application-code/${{ parameters.system }}/${{ parameters.service }}
+        targetPath: application-code/${{ parameters.system | replace('system:default/', '') }}/${{ parameters.service }}
         values:
-          system: ${{ parameters.system }}
+          system: ${{ parameters.system | replace('system:default/', '') }}
           service: ${{ parameters.service }}
           description: ${{ parameters.description }}
           owner: ${{ parameters.owner }}
-          # tags: ['nodejs', 'example-tag2', 'example-tag3']
-          # tags:
-          #   - hard-coded-tag1
-          #   - hard-coded-tag2
+          repoHost: ${{ (parameters.repoUrl | parseRepoUrl).host }}
+          repoOwner: ${{ (parameters.repoUrl | parseRepoUrl).owner }}
+          repoName: ${{ (parameters.repoUrl | parseRepoUrl).repo }}
 
     - id: fetch-helm-chart
       name: Fetch Helm Chart
       action: fetch:template
       input:
         url: ./helm-chart
-        targetPath: helm-charts/systems/${{ parameters.system }}/${{ parameters.service }}
+        targetPath: helm-charts/systems/${{ parameters.system | replace('system:default/', '') }}/${{ parameters.service }}
         values:
-          system: ${{ parameters.system }}
+          system: ${{ parameters.system | replace('system:default/', '') }}
           service: ${{ parameters.service }}
+
+    - id: fetch-argocd-applications
+      name: Fetch ArgoCD application manifests
+      action: fetch:template
+      input:
+        url: ./argocd-applications
+        targetPath: argo-cd/applications/systems/${{ parameters.system | replace('system:default/', '') }}/${{ parameters.service }}
+        values:
+          system: ${{ parameters.system | replace('system:default/', '') }}
+          service: ${{ parameters.service }}
+          repoHost: ${{ (parameters.repoUrl | parseRepoUrl).host }}
+          repoOwner: ${{ (parameters.repoUrl | parseRepoUrl).owner }}
+          repoName: ${{ (parameters.repoUrl | parseRepoUrl).repo }}
 
     - id: fetch-github-workflow
       name: Fetch GitHub Workflow
@@ -97,7 +125,7 @@ spec:
         url: ./github-workflow
         targetPath: .github/workflows
         values:
-          system: ${{ parameters.system }}
+          system: ${{ parameters.system | replace('system:default/', '') }}
           service: ${{ parameters.service }}
 
     - id: publish
@@ -106,25 +134,21 @@ spec:
       input:
         allowedHosts: ['github.com']
         repoUrl: ${{ parameters.repoUrl }}
-        title: "Create new project: ${{ parameters.system }}-${{ parameters.service }}"
-        branchName: create-${{ parameters.system }}-${{ parameters.service }}
+        title: "Create new project: ${{ parameters.system | replace('system:default/', '') }}-${{ parameters.service }}"
+        branchName: create-${{ parameters.system | replace('system:default/', '') }}-${{ parameters.service }}
         description: |
-          # New project: ${{ parameters.system }}-${{ parameters.service }}
+          # New project: ${{ parameters.system | replace('system:default/', '') }}-${{ parameters.service }}
 
           ${{ parameters.description if parameters.description }}
         targetPath: "" # Leave empty to use the root of the repo or specify if needed
-        paths: 
-          - application-code/${{ parameters.system }}/${{ parameters.service }}
-          - helm-charts/systems/${{ parameters.system }}/${{parameters.service}}
-          - .github/workflows
+        # paths: 
+        #   - application-code/${{ parameters.system }}/${{ parameters.service }}
+        #   - helm-charts/systems/${{ parameters.system }}/${{parameters.service}}
+        #   - argo-cd/applications/systems/${{ parameters.system }}/${{ parameters.service }}
+        #   - .github/workflows
 
 
   output:
     links:
-      # - title: Repository
-      #   url: ${{ steps.publish.output.remoteUrl }}
       - url: ${{ steps.publish.output.remoteUrl }}
         title: "Go to PR"
-      # - title: Open in catalog
-      #   icon: catalog
-      #   entityRef: ${{ steps.register.output.entityRef }}

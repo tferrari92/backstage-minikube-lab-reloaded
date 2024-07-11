@@ -1,7 +1,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: System
 metadata:
-  name: ${{ values.name | lower }}
+  name: ${{ values.name }}
   {%- if values.description %}
   description: ${{ values.description }}
   {%- endif %}

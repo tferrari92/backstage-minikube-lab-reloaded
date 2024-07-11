@@ -8,30 +8,37 @@ metadata:
   annotations:
     backstage.io/techdocs-ref: dir:.
     backstage.io/kubernetes-id: ${{ values.system }}-${{ values.service }}
+    github.com/project-slug: ${{ values.repoOwner }}/${{ values.repoName }}
+    argocd/app-selector: system-service=${{ values.system }}-${{ values.service }} # This is for Backstage ArgoCD plugin. You need to add this label in the application.yaml. You can also use argocd/app-name
+    grafana/dashboard-selector: "tags @> 'linux'" # The following selector will return dashboards that have a 'linux' tag
   tags:
     - nginx
-  links:
+  links: 
     - title: Documentation
-      url: https://github.com/tferrari92/backstage-minikube-lab-reloaded
-    - url: https://admin.example-org.com
-      title: Admin Dashboard
-      icon: dashboard
+      url: https://${{ values.repoHost }}/${{ values.repoOwner }}/${{ values.repoName }}.git
+      icon: docs
+    - title: Admin Dashboard
       type: admin-dashboard
-    - url: https://grafana.domain.com/
-      title: metrics
-      icon: analytics
+      icon: dashboard
+      url: https://admin.example-org.com
+    - title: Metrics
       type: metrics-dashboard
-    - url: https://grafana.domain.com/
-      title: logs
-      icon: assignment
+      icon: analytics
+      url: https://grafana.domain.com/
+    - title: Logs
       type: logs-dashboard  
+      icon: assignment
+      url: https://grafana.domain.com/
+    - title: Helm Chart
+      type: helm-chart 
+      icon: github
+      url: https://${{ values.repoHost }}/${{ values.repoOwner }}/${{ values.repoName }}/tree/main/helm-charts/systems/${{ values.system }}/${{ values.service }}
 spec:
   type: service
   lifecycle: experimental
   owner: ${{ values.owner }}
   system: ${{ values.system }}
-  # dependsOn:
-  #   - 
-  # providesApis:
-  #   - 
-
+  dependsOn:
+    - component:default/${{ values.system }}-backend
+  # consumesApis:
+  #   - ${{ values.system }}-backend-api

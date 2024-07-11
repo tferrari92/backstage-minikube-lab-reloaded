@@ -10,6 +10,9 @@ spec:
   owner: web@example.com
   type: component
   parameters:
+
+    ###############################################################################################################
+    # First page
     - title: Provide some simple information
       required:
         - name
@@ -23,33 +26,35 @@ spec:
           type: string
           description: Name of the new user
           ui:field: EntityNamePicker
-          ui:autofocus: true
+
         lastName:
           title: Last Name
           type: string
           description: Last name of the new user
           ui:field: EntityNamePicker
-          ui:autofocus: true
+
         email:
           title: Email
           type: string
-          description: Email of the new user
-          # ui:field: EntityNamePicker
-          ui:autofocus: true
+          pattern: ^\S+@\S+\.\S+$
+          description: Email of the new group
+
         pictureURL:
           title: Profile picutre
           type: string
           description: URL to the profile picture of the new user
-          ui:autofocus: true
+
         group:
           title: Group
           type: string
           description: Group this user belongs to
           ui:field: OwnerPicker
           ui:options:
-            allowedKinds:
-              - Group
+            catalogFilter: # This uses the value "group:default/meme-web-team"
+              - kind: Group
 
+    ###############################################################################################################
+    # Second page
     - title: Choose a location
       required:
         - repoUrl
@@ -61,6 +66,15 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
+            # allowedOrganizations: # This doesn't get displayed as a dropdown list like allowedRepos does, IDK why.
+            #   - AATT_GITHUB_USERNAME
+            allowedRepos:
+              - backstage-minikube-lab
+              - backstage-minikube-lab-reloaded
+              - automate-all-the-things-braindamage
+              - automate-all-the-things-transcendence
+              - automate-all-the-things-nirvana
+              - automate-all-the-things-almighty
 
   steps:
     - id: fetch-base
@@ -72,18 +86,8 @@ spec:
           name: ${{ parameters.name }}
           lastName: ${{ parameters.lastName }}
           email: ${{ parameters.email }}
-          group: ${{ parameters.group }}
+          group: ${{ parameters.group | replace('group:default/', '') }}
           pictureURL: ${{ parameters.pictureURL }}
-
-    # - id: append-new-user
-    #   name: Append new user to all-users.yaml
-    #   action: shell
-    #   input:
-    #     cmd: bash
-    #     args:
-    #       - -c
-    #       - |
-    #         echo "    - ./users/${{parameters.name | lower }}-${{parameters.lastName | lower }}.yaml" >> entities/all-users.yaml
 
     - id: publish
       name: Publish
@@ -91,24 +95,14 @@ spec:
       input:
         allowedHosts: ['github.com']
         repoUrl: ${{ parameters.repoUrl }}
-        title: "Create new user: ${{parameters.name}} ${{parameters.lastName}}"
+        title: "Create new user: ${{ parameters.name }} ${{ parameters.lastName }}"
         branchName: create-user-${{parameters.name | lower }}-${{parameters.lastName | lower }}
         description: |
-          # New user: ${{parameters.name}} ${{parameters.lastName}}
+          # New user: ${{ parameters.name }} ${{ parameters.lastName }}
         targetPath: backstage/entities/users
-        # targetPath: "" # Leave empty to use the root of the repo or specify if needed
-        # paths: 
-        #   - backstage/entities/users
-        #   - backstage/entities/all-users.yaml
+
         
   output:
     links:
-      - url: ${{steps.publish.output.remoteUrl}}
+      - url: ${{ steps.publish.output.remoteUrl }}
         title: "Go to PR"
-      # - title: Repository
-      #   url: ${{ steps.publish.output.remoteUrl }}
-      # - title: Open in catalog
-      #   icon: catalog
-      #   entityRef: ${{ steps.register.output.entityRef }}
-
-

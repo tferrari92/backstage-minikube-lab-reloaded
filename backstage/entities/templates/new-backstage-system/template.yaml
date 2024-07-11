@@ -10,6 +10,9 @@ spec:
   owner: web@example.com
   type: component
   parameters:
+
+    ###############################################################################################################
+    # First page
     - title: Provide some simple information
       required:
         - name
@@ -21,29 +24,35 @@ spec:
           type: string
           description: Name of the new system
           ui:field: EntityNamePicker
-          ui:autofocus: true
+          pattern: '^[a-z0-9-]+$' # Only lowercase letters, numbers and hyphens
+          maxLength: 30
+          ui:help: 'Use only lowercase letters, numbers and hyphens. Max length: 30 characters.'  
+
         description:
           title: Description
           type: string
-          description: Help others understand what this system is for
+          description: Help others understand what this system is for.
+          minLength: 10
+          ui:help: 'Make it descriptive! At least 10 characters.'
+
         owner:
           title: Owner
           type: string
-          description: Owner of the service
+          description: Owner of the service.
           ui:field: OwnerPicker
           ui:options:
-            allowedKinds:
-              - Group
+            catalogFilter: # This uses the value "group:default/meme-web-team"
+              - kind: Group
+              
         tags:
           title: Tags
           type: array
           items:
             type: string
           description: Tags associated with the system
-          # ui:field: TagsPicker
-          # ui:options:
-          #   freeSolo: true  
 
+    ###############################################################################################################
+    # Second page
     - title: Choose a location
       required:
         - repoUrl
@@ -55,6 +64,15 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
+            # allowedOrganizations: # This doesn't get displayed as a dropdown list like allowedRepos does, IDK why.
+            #   - AATT_GITHUB_USERNAME
+            allowedRepos:
+              - backstage-minikube-lab
+              - backstage-minikube-lab-reloaded
+              - automate-all-the-things-braindamage
+              - automate-all-the-things-transcendence
+              - automate-all-the-things-nirvana
+              - automate-all-the-things-almighty
 
   steps:
     - id: fetch-base
@@ -74,16 +92,15 @@ spec:
       input:
         allowedHosts: ['github.com']
         repoUrl: ${{ parameters.repoUrl }}
-        title: "Create new system: ${{parameters.name}}"
-        branchName: create-system-${{parameters.name | lower }}
+        title: "Create new system: ${{ parameters.name }}"
+        branchName: create-system-${{ parameters.name }}
         description: |
-          # New system: ${{parameters.name}}
+          # New system: ${{ parameters.name }}
 
           ${{ parameters.description if parameters.description }}
         targetPath: backstage/entities/systems
         
   output:
     links:
-      - url: ${{steps.publish.output.remoteUrl}}
+      - url: ${{ steps.publish.output.remoteUrl }}
         title: "Go to PR"
-
